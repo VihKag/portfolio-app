@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback", system-ui;
+
+  /* Mapping từ CSS variable sang Tailwind v4 token */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+}
+
+@layer base {
+  :root {
+    /* Premium dark theme with teal accents */
+    --background: 240 10% 8.6%;
+    --foreground: 240 10% 95.9%;
+    --card: 240 10% 14%;
+    --card-foreground: 240 10% 95.9%;
+    --popover: 240 10% 14%;
+    --popover-foreground: 240 10% 95.9%;
+    --muted: 240 10% 25%;
+    --muted-foreground: 240 5% 64.1%;
+    --accent: 174 73% 45%;
+    --accent-foreground: 240 10% 8.6%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 240 10% 8.6%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --primary: 240 10% 95.9%;
+    --primary-foreground: 240 10% 8.6%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 8.6%;
+    --foreground: 240 10% 95.9%;
+    --card: 240 10% 14%;
+    --card-foreground: 240 10% 95.9%;
+    --popover: 240 10% 14%;
+    --popover-foreground: 240 10% 95.9%;
+    --muted: 240 10% 25%;
+    --muted-foreground: 240 5% 64.1%;
+    --accent: 174 73% 45%;
+    --accent-foreground: 240 10% 8.6%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 240 10% 8.6%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --primary: 240 10% 95.9%;
+    --primary-foreground: 240 10% 8.6%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Add smooth scrolling and enhanced typography */
+  html {
+    @apply scroll-smooth;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Add gradient text utility */
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent via-accent to-accent/70 bg-clip-text text-transparent;
+  }
+
+  /* Add glow effect for interactive elements */
+  .glow-accent {
+    @apply shadow-lg shadow-accent/20;
+  }
+   /* Add smooth animations and transitions */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1),);
+    background-size: 1000px 100%;
+  }
+}
