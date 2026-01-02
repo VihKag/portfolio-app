@@ -11,7 +11,7 @@ import { ContactMessages } from "@/components/dashboard/contact-messages"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { toast } from "sonner"
 
-export default function DashboardPage() {
+export default function DashboardPage({ session }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -19,32 +19,43 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkUser = async () => {
       try {
+        if (session?.user) {
+          setUser(session.user)
+          setLoading(false)
+          return
+        }
+
+        // Fallback: Check if there's an active session
         const {
           data: { user: authUser },
           error,
         } = await supabase.auth.getUser()
 
         if (error || !authUser) {
-          toast.error("Please log in first")
-          navigate("/auth/login")
+          toast.error("Please log in to access the dashboard")
+          navigate("/auth/login", { replace: true })
           return
         }
 
-        console.log("[v0] Authenticated user:", authUser.id)
         setUser(authUser)
       } catch (err) {
         console.error("[v0] Error checking user:", err)
-        navigate("/auth/login")
+        toast.error("Authentication error")
+        navigate("/auth/login", { replace: true })
       } finally {
         setLoading(false)
       }
     }
 
     checkUser()
-  }, [navigate])
+  }, [navigate, session])
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+      </div>
+    )
   }
 
   if (!user) {
