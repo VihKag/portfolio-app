@@ -10,6 +10,14 @@ import { SocialLinksManager } from "@/components/dashboard/social-links-manager"
 import { ContactMessages } from "@/components/dashboard/contact-messages"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { toast } from "sonner"
+import { Loader2, LayoutGrid, User, Link as LinkIcon, MessageSquare } from "lucide-react"
+
+const TABS = [
+  { value: "portfolio", label: "Portfolio",   icon: LayoutGrid   },
+  { value: "profile",   label: "Profile",     icon: User         },
+  { value: "social",    label: "Social Links", icon: LinkIcon    },
+  { value: "messages",  label: "Messages",    icon: MessageSquare },
+]
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -19,10 +27,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const {
-          data: { user: authUser },
-          error,
-        } = await supabase.auth.getUser()
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
         if (error || !authUser) {
           toast.error("Please log in first")
@@ -30,10 +35,8 @@ export default function DashboardPage() {
           return
         }
 
-        console.log("[v0] Authenticated user:", authUser.id)
         setUser(authUser)
-      } catch (err) {
-        console.error("[v0] Error checking user:", err)
+      } catch {
         navigate("/auth/login")
       } finally {
         setLoading(false)
@@ -43,46 +46,55 @@ export default function DashboardPage() {
     checkUser()
   }, [navigate])
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  }
-
-  if (!user) {
-    return null
-  }
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
     toast.success("Logged out successfully")
     navigate("/")
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-muted-foreground">
+        <Loader2 className="w-7 h-7 animate-spin text-accent" />
+        <span className="text-sm">Loading dashboard…</span>
+      </div>
+    )
+  }
+
+  if (!user) return null
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader user={user} onLogout={handleLogout} />
 
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 max-w-5xl">
         <Tabs defaultValue="portfolio" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="social">Social Links</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-card border border-border/50 rounded-xl mb-8">
+            {TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex items-center gap-2 py-2.5 text-sm rounded-lg data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm data-[state=active]:glow-accent-sm transition-all"
+              >
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{label}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value="portfolio" className="mt-6">
+          <TabsContent value="portfolio" className="mt-0 animate-fade-in">
             <PortfolioManager userId={user.id} />
           </TabsContent>
 
-          <TabsContent value="profile" className="mt-6">
+          <TabsContent value="profile" className="mt-0 animate-fade-in">
             <ProfileSettings userId={user.id} />
           </TabsContent>
 
-          <TabsContent value="social" className="mt-6">
+          <TabsContent value="social" className="mt-0 animate-fade-in">
             <SocialLinksManager userId={user.id} />
           </TabsContent>
 
-          <TabsContent value="messages" className="mt-6">
+          <TabsContent value="messages" className="mt-0 animate-fade-in">
             <ContactMessages userId={user.id} />
           </TabsContent>
         </Tabs>
