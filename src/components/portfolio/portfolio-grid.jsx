@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 "use client"
 
 import { useState } from "react"
@@ -6,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, ImageIcon, Code, FileText, Play } from "lucide-react"
 
-export function PortfolioGrid({ items }) {
+export function PortfolioGrid({ items, themeColor = "#14b8a6", backgroundColor = "#0e0e16" }) {
   const [activeType, setActiveType] = useState("all")
 
   // Define content types with icons and colors
@@ -26,11 +25,12 @@ export function PortfolioGrid({ items }) {
       <div className="flex gap-2 mb-12 flex-wrap">
         <button
           onClick={() => setActiveType("all")}
-          className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 hover:shadow-lg hover:shadow-accent/20 hover:border-accent ${
+          className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 ${
             activeType === "all"
               ? "bg-accent text-accent-foreground shadow-lg shadow-accent/30"
               : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
           }`}
+          style={activeType === "all" ? { backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}40` } : {}}
         >
           All Work
         </button>
@@ -43,11 +43,12 @@ export function PortfolioGrid({ items }) {
             <button
               key={key}
               onClick={() => setActiveType(key)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 hover:shadow-lg hover:shadow-accent/20 hover:border-accent ${
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 ${
                 activeType === key
                   ? "bg-accent text-accent-foreground shadow-lg shadow-accent/30"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 border border-border"
               }`}
+              style={activeType === key ? { backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}40` } : {}}
             >
               <Icon className="w-4 h-4" />
               {label} ({count})
@@ -95,7 +96,20 @@ export function PortfolioGrid({ items }) {
                             href={item.project_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-accent text-accent-foreground py-2 px-4 rounded-lg font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
+                            className="flex-1 py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg"
+                            style={{
+                              backgroundColor: themeColor,
+                              color: "white",
+                              boxShadow: `0 0 15px ${themeColor}40`,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.filter = "brightness(1.1)"
+                              e.currentTarget.style.boxShadow = `0 0 20px ${themeColor}60`
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.filter = "brightness(1)"
+                              e.currentTarget.style.boxShadow = `0 0 15px ${themeColor}40`
+                            }}
                           >
                             View <ExternalLink className="w-4 h-4" />
                           </a>
@@ -105,7 +119,20 @@ export function PortfolioGrid({ items }) {
                             href={item.video_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-accent text-accent-foreground py-2 px-4 rounded-lg font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
+                            className="flex-1 py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg"
+                            style={{
+                              backgroundColor: themeColor,
+                              color: "white",
+                              boxShadow: `0 0 15px ${themeColor}40`,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.filter = "brightness(1.1)"
+                              e.currentTarget.style.boxShadow = `0 0 20px ${themeColor}60`
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.filter = "brightness(1)"
+                              e.currentTarget.style.boxShadow = `0 0 15px ${themeColor}40`
+                            }}
                           >
                             Watch <ExternalLink className="w-4 h-4" />
                           </a>
@@ -127,7 +154,14 @@ export function PortfolioGrid({ items }) {
 
                   {/* View count badge */}
                   {item.view_count > 0 && (
-                    <Badge variant="secondary" className="mb-3 bg-accent/10 text-accent">
+                    <Badge
+                      variant="secondary"
+                      className="mb-3 bg-accent/10 text-accent"
+                      style={{
+                        backgroundColor: `${themeColor}20`,
+                        color: themeColor,
+                      }}
+                    >
                       {item.view_count} views
                     </Badge>
                   )}
@@ -139,7 +173,11 @@ export function PortfolioGrid({ items }) {
                         <Badge
                           key={tag}
                           variant="secondary"
-                          className="text-xs bg-muted text-muted-foreground hover:bg-accent/20 hover:text-accent transition-colors"
+                          className="text-xs bg-muted text-muted-foreground transition-colors"
+                          style={{
+                            backgroundColor: `${backgroundColor}40 !important`,
+                            color: themeColor,
+                          }}
                         >
                           {tag}
                         </Badge>

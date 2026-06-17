@@ -53,7 +53,7 @@ export default function LandingPage() {
               asChild
               variant="outline"
               size="lg"
-              className="hover:border-accent hover:text-accent bg-transparent"
+              className="hover:border-accent  bg-transparent"
             >
               <Link to="/auth/login">Sign In</Link>
             </Button>
@@ -68,7 +68,7 @@ function FeatureCard({ icon, title, description }) {
   return (
     <div className="group p-8 rounded-xl border border-border bg-card hover:border-accent/50 hover:bg-card/80 transition-all duration-300">
       <div className="mb-6 p-3 w-fit rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">{icon}</div>
-      <h3 className="text-xl font-semibold mb-3 group-hover:text-accent transition-colors">{title}</h3>
+      <h3 className="text-xl font-semibold mb-3 group- transition-colors">{title}</h3>
       <p className="text-muted-foreground leading-relaxed">{description}</p>
     </div>
   )

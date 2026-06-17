@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -10,15 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { Trash2 } from "lucide-react"
+import { Trash2, Upload } from "lucide-react"
 
-export function PortfolioManager({ userId }) {
+export function PortfolioManager({ userId, themeColor }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [contentType, setContentType] = useState("image")
-  const [imageUrl, setImageUrl] = useState("")
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState("")
   const [projectUrl, setProjectUrl] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
   const [tags, setTags] = useState("")
@@ -37,11 +39,50 @@ export function PortfolioManager({ userId }) {
     if (data) setItems(data)
   }
 
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setImagePreview(event.target?.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const uploadImageToStorage = async (file) => {
+    const fileExt = file.name.split(".").pop()
+    const fileName = `${userId}/${Date.now()}.${fileExt}`
+
+    const { data, error } = await supabase.storage.from("portfolio_images").upload(fileName, file)
+
+    if (error) {
+      toast.error("Failed to upload image")
+      return null
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("portfolio_images").getPublicUrl(fileName)
+
+    return publicUrl
+  }
+
   const handleAddItem = async (e) => {
     e.preventDefault()
     setLoading(true)
 
     try {
+      let imageUrl = ""
+      if (imageFile) {
+        imageUrl = await uploadImageToStorage(imageFile)
+        if (!imageUrl) {
+          setLoading(false)
+          return
+        }
+      }
+
       const { error } = await supabase.from("portfolio_items").insert({
         user_id: userId,
         content_type: contentType,
@@ -63,7 +104,8 @@ export function PortfolioManager({ userId }) {
         toast.success("Item added successfully!")
         setTitle("")
         setDescription("")
-        setImageUrl("")
+        setImageFile(null)
+        setImagePreview("")
         setProjectUrl("")
         setVideoUrl("")
         setTags("")
@@ -133,13 +175,26 @@ export function PortfolioManager({ userId }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                placeholder="https://example.com/image.jpg"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
+              <Label htmlFor="imageFile">Upload Image</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="imageFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  className="cursor-pointer"
+                />
+                <Upload className="w-4 h-4 text-muted-foreground" />
+              </div>
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview || "/placeholder.svg"}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded-lg border border-border"
+                  />
+                </div>
+              )}
             </div>
 
             {contentType === "project" && (
@@ -171,7 +226,15 @@ export function PortfolioManager({ userId }) {
               <Input id="tags" placeholder="design, web, 2024" value={tags} onChange={(e) => setTags(e.target.value)} />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full"
+              style={{
+                backgroundColor: `${themeColor || "#14b8a6"} !important`,
+                color: `${getContrastColor(themeColor || "#14b8a6")} !important`,
+              }}
+            >
               {loading ? "Adding..." : "Add Item"}
             </Button>
           </form>
@@ -179,10 +242,10 @@ export function PortfolioManager({ userId }) {
       </Card>
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">Your Items</h3>
+        <h3 className="text-lg font-semibold mb-4">Preview: Your Content Links</h3>
         <div className="grid gap-4">
           {items.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.id} className="border-border hover:border-accent transition-colors">
               <CardContent className="pt-6 flex gap-4">
                 {item.image_url && (
                   <img
@@ -203,6 +266,42 @@ export function PortfolioManager({ userId }) {
                           </Badge>
                         ))}
                       </div>
+                      <div className="flex gap-2 mt-3">
+                        {item.project_url && (
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            style={{
+                              backgroundColor: `${themeColor || "#14b8a6"} !important`,
+                              borderColor: `${themeColor || "#14b8a6"} !important`,
+                              color: `${getContrastColor(themeColor || "#14b8a6")} !important`,
+                            }}
+                            className="hover:bg-opacity-10 transition-colors bg-transparent"
+                          >
+                            <a href={item.project_url} target="_blank" rel="noopener noreferrer">
+                              View Project
+                            </a>
+                          </Button>
+                        )}
+                        {item.video_url && (
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            style={{
+                              backgroundColor: `${themeColor || "#14b8a6"} !important`,
+                              borderColor: `${themeColor || "#14b8a6"} !important`,
+                              color: `${getContrastColor(themeColor || "#14b8a6")} !important`,
+                            }}
+                            className="hover:bg-opacity-10 transition-colors bg-transparent"
+                          >
+                            <a href={item.video_url} target="_blank" rel="noopener noreferrer">
+                              Watch Video
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
                       <Trash2 className="w-4 h-4" />
@@ -216,4 +315,12 @@ export function PortfolioManager({ userId }) {
       </div>
     </div>
   )
+}
+
+function getContrastColor(hexColor) {
+  const r = Number.parseInt(hexColor.substr(1, 2), 16)
+  const g = Number.parseInt(hexColor.substr(3, 2), 16)
+  const b = Number.parseInt(hexColor.substr(5, 2), 16)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness > 128 ? "#000000" : "#ffffff"
 }

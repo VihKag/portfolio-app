@@ -1,16 +1,14 @@
-/* eslint-disable no-unused-vars */
 "use client"
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 
-export function ContactForm({ userId }) {
+export function ContactForm({ userId, themeColor = "#14b8a6" }) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
@@ -73,9 +71,28 @@ export function ContactForm({ userId }) {
               rows={5}
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 text-white"
+            style={{
+              backgroundColor: themeColor,
+              boxShadow: `0 0 15px ${themeColor}40`,
+              opacity: loading ? 0.7 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.filter = "brightness(1.1)"
+                e.currentTarget.style.boxShadow = `0 0 20px ${themeColor}60`
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = "brightness(1)"
+              e.currentTarget.style.boxShadow = `0 0 15px ${themeColor}40`
+            }}
+          >
             {loading ? "Sending..." : "Send Message"}
-          </Button>
+          </button>
         </form>
       </CardContent>
     </Card>

@@ -4,9 +4,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ExternalLink } from "lucide-react"
 
-export function Header() {
+export function Header({ username }) {
   const [session, setSession] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
@@ -35,8 +35,19 @@ export function Header() {
         <nav className="hidden md:flex gap-6 items-center">
           {session ? (
             <>
-              <Button asChild variant="ghost" className="hover:text-accent">
+              <Button asChild variant="ghost" className="">
                 <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="hover:border-accent  bg-transparent"
+                disabled={!username}
+              >
+                <Link to={username ? `/portfolio/${username}` : "#"} className="flex items-center gap-2">
+                  <span>View Portfolio</span>
+                  <ExternalLink className="w-4 h-4" />
+                </Link>
               </Button>
               <Button
                 variant="outline"
@@ -45,14 +56,14 @@ export function Header() {
                   navigate("/")
                   setMenuOpen(false)
                 }}
-                className="hover:border-accent hover:text-accent"
+                className="hover:border-accent "
               >
                 Sign Out
               </Button>
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" className="hover:text-accent">
+              <Button asChild variant="ghost" className="">
                 <Link to="/auth/login">Sign In</Link>
               </Button>
               <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -72,8 +83,19 @@ export function Header() {
           <nav className="flex flex-col gap-3 p-4">
             {session ? (
               <>
-                <Button asChild variant="ghost" className="justify-start hover:text-accent">
+                <Button asChild variant="ghost" className="justify-start ">
                   <Link to="/dashboard">Dashboard</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="justify-start hover:border-accent  bg-transparent"
+                  disabled={!username}
+                >
+                  <Link to={username ? `/portfolio/${username}` : "#"} className="flex items-center gap-2">
+                    <span>View Portfolio</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </Link>
                 </Button>
                 <Button
                   variant="outline"
@@ -82,14 +104,14 @@ export function Header() {
                     navigate("/")
                     setMenuOpen(false)
                   }}
-                  className="hover:border-accent hover:text-accent"
+                  className="hover:border-accent "
                 >
                   Sign Out
                 </Button>
               </>
             ) : (
               <>
-                <Button asChild variant="ghost" className="justify-start hover:text-accent">
+                <Button asChild variant="ghost" className="justify-start ">
                   <Link to="/auth/login">Sign In</Link>
                 </Button>
                 <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
