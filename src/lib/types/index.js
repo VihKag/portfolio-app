@@ -41,3 +41,47 @@ export const ContactMessageSchema = {
   read: Boolean,
   created_at: String,
 }
+
+export const ExperienceSchema = {
+  id: String,
+  user_id: String,
+  title: String,
+  company: String,
+  location: String,
+  start_date: String,
+  end_date: String,
+  description: String, // newline-separated bullet points
+  sort_order: Number,
+  created_at: String,
+}
+
+export const EducationSchema = {
+  id: String,
+  user_id: String,
+  degree: String,
+  school: String,
+  location: String,
+  start_date: String,
+  end_date: String,
+  details: String, // newline-separated bullet points
+  sort_order: Number,
+  created_at: String,
+}
+
+export const SkillSchema = {
+  id: String,
+  user_id: String,
+  category: String,
+  items: Array, // array of skill strings
+  sort_order: Number,
+  created_at: String,
+}
+
+export const CertificationSchema = {
+  id: String,
+  user_id: String,
+  name: String,
+  issuer: String,
+  sort_order: Number,
+  created_at: String,
+}

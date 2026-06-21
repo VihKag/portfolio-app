@@ -35,20 +35,17 @@ export function Header({ username }) {
         <nav className="hidden md:flex gap-6 items-center">
           {session ? (
             <>
-              <Button asChild variant="ghost" className="">
+              <Button asChild variant="ghost">
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="hover:border-accent  bg-transparent"
-                disabled={!username}
-              >
-                <Link to={username ? `/portfolio/${username}` : "#"} className="flex items-center gap-2">
-                  <span>View Portfolio</span>
-                  <ExternalLink className="w-4 h-4" />
-                </Link>
-              </Button>
+              {username && (
+                <Button asChild variant="outline" className="hover:border-accent bg-transparent">
+                  <Link to={`/portfolio/${username}`} className="flex items-center gap-2">
+                    <span>View Portfolio</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </Link>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={async () => {
@@ -56,14 +53,14 @@ export function Header({ username }) {
                   navigate("/")
                   setMenuOpen(false)
                 }}
-                className="hover:border-accent "
+                className="hover:border-accent"
               >
                 Sign Out
               </Button>
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" className="">
+              <Button asChild variant="ghost">
                 <Link to="/auth/login">Sign In</Link>
               </Button>
               <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -83,20 +80,17 @@ export function Header({ username }) {
           <nav className="flex flex-col gap-3 p-4">
             {session ? (
               <>
-                <Button asChild variant="ghost" className="justify-start ">
+                <Button asChild variant="ghost" className="justify-start">
                   <Link to="/dashboard">Dashboard</Link>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="justify-start hover:border-accent  bg-transparent"
-                  disabled={!username}
-                >
-                  <Link to={username ? `/portfolio/${username}` : "#"} className="flex items-center gap-2">
-                    <span>View Portfolio</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-                </Button>
+                {username && (
+                  <Button asChild variant="outline" className="justify-start hover:border-accent bg-transparent">
+                    <Link to={`/portfolio/${username}`} className="flex items-center gap-2">
+                      <span>View Portfolio</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={async () => {
@@ -104,14 +98,14 @@ export function Header({ username }) {
                     navigate("/")
                     setMenuOpen(false)
                   }}
-                  className="hover:border-accent "
+                  className="hover:border-accent"
                 >
                   Sign Out
                 </Button>
               </>
             ) : (
               <>
-                <Button asChild variant="ghost" className="justify-start ">
+                <Button asChild variant="ghost" className="justify-start">
                   <Link to="/auth/login">Sign In</Link>
                 </Button>
                 <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">

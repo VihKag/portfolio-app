@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom"
 import { supabase } from "@/lib/supabase/client"
 import { Card } from "@/components/ui/card"
 import { PortfolioGrid } from "@/components/portfolio/portfolio-grid"
+import { ResumeSection } from "@/components/portfolio/resume-section"
 import { ContactForm } from "@/components/portfolio/contact-form"
 import { Header } from "@/components/layout/header"
 import { Mail, Loader, Heart } from "lucide-react"
@@ -16,6 +17,10 @@ export default function PortfolioPage() {
   const [items, setItems] = useState([])
   const [socialLinks, setSocialLinks] = useState([])
   const [memoriesHobbies, setMemoriesHobbies] = useState([])
+  const [experiences, setExperiences] = useState([])
+  const [education, setEducation] = useState([])
+  const [skills, setSkills] = useState([])
+  const [certifications, setCertifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [themeColor, setThemeColor] = useState("#14b8a6")
   const [backgroundColor, setBackgroundColor] = useState("#0e0e16")
@@ -63,6 +68,18 @@ export default function PortfolioPage() {
           .order("created_at", { ascending: false })
 
         if (memoriesData) setMemoriesHobbies(memoriesData)
+
+        const [expRes, eduRes, skillsRes, certRes] = await Promise.all([
+          supabase.from("experiences").select("*").eq("user_id", profileData.id).order("sort_order"),
+          supabase.from("education").select("*").eq("user_id", profileData.id).order("sort_order"),
+          supabase.from("skills").select("*").eq("user_id", profileData.id).order("sort_order"),
+          supabase.from("certifications").select("*").eq("user_id", profileData.id).order("sort_order"),
+        ])
+
+        if (expRes.data) setExperiences(expRes.data)
+        if (eduRes.data) setEducation(eduRes.data)
+        if (skillsRes.data) setSkills(skillsRes.data)
+        if (certRes.data) setCertifications(certRes.data)
       } catch (error) {
         console.error("Error fetching portfolio:", error)
       } finally {
@@ -164,6 +181,14 @@ export default function PortfolioPage() {
             <PortfolioGrid items={items} themeColor={themeColor} backgroundColor={backgroundColor} />
           </div>
         )}
+
+        <ResumeSection
+          experiences={experiences}
+          education={education}
+          skills={skills}
+          certifications={certifications}
+          themeColor={themeColor}
+        />
 
         {(memories.length > 0 || hobbies.length > 0) && (
           <div className="mb-20">

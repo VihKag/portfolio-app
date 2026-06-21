@@ -13,7 +13,7 @@ export function DashboardHeader({ user, onLogout, username }) {
         </div>
         <div className="flex gap-3">
           {username && (
-            <Button asChild variant="outline" className="hover:border-accent  bg-transparent">
+            <Button asChild variant="outline" className="hover:border-accent bg-transparent">
               <Link to={`/portfolio/${username}`} className="flex items-center gap-2">
                 <span>View Portfolio</span>
                 <ExternalLink className="w-4 h-4" />

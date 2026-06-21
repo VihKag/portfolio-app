@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PortfolioManager } from "@/components/dashboard/portfolio-manager"
 import { ProfileSettings } from "@/components/dashboard/profile-settings"
+import { ResumeManager } from "@/components/dashboard/resume-manager"
 import { SocialLinksManager } from "@/components/dashboard/social-links-manager"
 import { ContactMessages } from "@/components/dashboard/contact-messages"
 import { MemoriesHobbies } from "@/components/dashboard/memories-hobbies"
@@ -86,9 +87,10 @@ export default function DashboardPage({ session }) {
 
       <div className="container mx-auto py-8 px-4">
         <Tabs defaultValue="portfolio" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 h-auto">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="resume">Resume</TabsTrigger>
             <TabsTrigger value="memories">Memories</TabsTrigger>
             <TabsTrigger value="social">Social Links</TabsTrigger>
             <TabsTrigger value="theme">Theme</TabsTrigger>
@@ -101,6 +103,10 @@ export default function DashboardPage({ session }) {
 
           <TabsContent value="profile" className="mt-6">
             <ProfileSettings userId={user.id} />
+          </TabsContent>
+
+          <TabsContent value="resume" className="mt-6">
+            <ResumeManager userId={user.id} />
           </TabsContent>
 
           <TabsContent value="memories" className="mt-6">
