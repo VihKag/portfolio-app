@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { stripMarkdown } from "@/lib/markdown"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { Trash2, Upload } from "lucide-react"
@@ -164,7 +165,7 @@ export function PortfolioManager({ userId, themeColor }) {
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
+              <RichTextEditor
                 id="description"
                 placeholder="Describe your item"
                 value={description}
@@ -258,7 +259,7 @@ export function PortfolioManager({ userId, themeColor }) {
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-semibold">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{stripMarkdown(item.description)}</p>
                       <div className="flex gap-2 mt-2 flex-wrap">
                         {item.tags?.map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs">

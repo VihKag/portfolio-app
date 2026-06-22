@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { supabase } from "@/lib/supabase/client"
 import { Card } from "@/components/ui/card"
+import { RichText } from "@/components/ui/rich-text"
 import { PortfolioGrid } from "@/components/portfolio/portfolio-grid"
 import { ResumeSection } from "@/components/portfolio/resume-section"
 import { ContactForm } from "@/components/portfolio/contact-form"
@@ -233,9 +234,10 @@ export default function PortfolioPage() {
             </h1>
 
             {profile.bio && (
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8">
-                {profile.bio}
-              </p>
+              <RichText
+                text={profile.bio}
+                className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8"
+              />
             )}
 
             {/* CTAs */}
@@ -388,7 +390,7 @@ export default function PortfolioPage() {
                         )}
                         <div className="p-6">
                           <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
-                          <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+                          <RichText text={item.description} className="text-muted-foreground text-sm leading-relaxed" />
                           {item.date && (
                             <p className="text-xs text-muted-foreground mt-3">
                               {new Date(item.date).toLocaleDateString()}
@@ -411,7 +413,7 @@ export default function PortfolioPage() {
                         )}
                         <div className="p-6">
                           <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
-                          <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+                          <RichText text={item.description} className="text-muted-foreground text-sm leading-relaxed" />
                         </div>
                       </Card>
                     ))}

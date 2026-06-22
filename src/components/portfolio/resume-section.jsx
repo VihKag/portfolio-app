@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { renderInline } from "@/lib/markdown"
 import { Briefcase, GraduationCap, Wrench, Award } from "lucide-react"
 
 function bullets(text) {
   if (!text) return []
   return text
     .split("\n")
-    .map((line) => line.trim())
+    .map((line) => line.trim().replace(/^[-*]\s+/, ""))
     .filter(Boolean)
 }
 
@@ -57,7 +58,7 @@ export function ResumeSection({ experiences = [], education = [], skills = [], c
                     {bullets(item.description).length > 0 && (
                       <ul className="space-y-1.5 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
                         {bullets(item.description).map((b, i) => (
-                          <li key={i}>{b}</li>
+                          <li key={i}>{renderInline(b, `exp-${i}`)}</li>
                         ))}
                       </ul>
                     )}
@@ -88,7 +89,7 @@ export function ResumeSection({ experiences = [], education = [], skills = [], c
                     {bullets(item.details).length > 0 && (
                       <ul className="space-y-1.5 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
                         {bullets(item.details).map((b, i) => (
-                          <li key={i}>{b}</li>
+                          <li key={i}>{renderInline(b, `edu-${i}`)}</li>
                         ))}
                       </ul>
                     )}

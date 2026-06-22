@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { stripMarkdown } from "@/lib/markdown"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { Trash2, Heart } from "lucide-react"
@@ -113,7 +114,7 @@ export function MemoriesHobbies({ userId }) {
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
+              <RichTextEditor
                 id="description"
                 placeholder="Tell the story or describe your hobby"
                 value={description}
@@ -165,7 +166,7 @@ export function MemoriesHobbies({ userId }) {
                 )}
                 <CardContent className="pt-6">
                   <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{stripMarkdown(item.description)}</p>
                   {item.date && (
                     <Badge variant="outline" className="mb-3">
                       {new Date(item.date).toLocaleDateString()}
@@ -198,7 +199,7 @@ export function MemoriesHobbies({ userId }) {
                 )}
                 <CardContent className="pt-6">
                   <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{stripMarkdown(item.description)}</p>
                   <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="w-full">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete

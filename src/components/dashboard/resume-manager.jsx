@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { Trash2, Briefcase, GraduationCap, Wrench, Award } from "lucide-react"
@@ -150,7 +150,7 @@ function ExperienceSection({ userId, items, onChange }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="exp-desc">Description (one bullet per line)</Label>
-            <Textarea
+            <RichTextEditor
               id="exp-desc"
               placeholder={"Maintained an enterprise BPM platform...\nOptimized SQL Server stored procedures..."}
               value={form.description}
@@ -287,7 +287,7 @@ function EducationSection({ userId, items, onChange }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="edu-details">Details (one bullet per line)</Label>
-            <Textarea
+            <RichTextEditor
               id="edu-details"
               placeholder={"GPA: 3.15 / 4.0\nRelevant coursework: ..."}
               value={form.details}

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { stripMarkdown } from "@/lib/markdown"
 import { ExternalLink, ImageIcon, Code, FileText, Play } from "lucide-react"
 
 export function PortfolioGrid({ items, themeColor = "#14b8a6", backgroundColor = "#0e0e16" }) {
@@ -150,7 +151,7 @@ export function PortfolioGrid({ items, themeColor = "#14b8a6", backgroundColor =
                     </h3>
                   </div>
 
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.description}</p>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{stripMarkdown(item.description)}</p>
 
                   {/* View count badge */}
                   {item.view_count > 0 && (

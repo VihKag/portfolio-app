@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { toast } from "sonner"
 import { Save, Camera } from "lucide-react"
 
@@ -106,13 +106,12 @@ export function ProfileSettings({ userId }) {
 
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
-              <Textarea
+              <RichTextEditor
                 id="bio"
                 placeholder="Tell us about yourself"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={4}
-                className="border-border"
               />
             </div>
 
