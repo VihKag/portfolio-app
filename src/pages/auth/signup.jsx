@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 "use client"
 
 import { useState } from "react"
@@ -21,12 +20,43 @@ export default function SignupPage() {
 
   const handleSignup = async (e) => {
     e.preventDefault()
+
+    const cleanUsername = username.trim().toLowerCase()
+    if (!cleanUsername) {
+      toast.error("Please choose a username")
+      return
+    }
+    if (!/^[a-z0-9_-]{3,30}$/.test(cleanUsername)) {
+      toast.error("Username must be 3-30 chars: letters, numbers, - or _")
+      return
+    }
+
     setLoading(true)
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Make sure the username isn't already taken
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id")
+        .eq("username", cleanUsername)
+        .maybeSingle()
+
+      if (existing) {
+        toast.error("That username is already taken")
+        return
+      }
+
+      // Pass profile data as metadata; the DB trigger (007) reads it to
+      // create the matching public.users row automatically.
+      const { error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username: cleanUsername,
+            full_name: displayName.trim(),
+          },
+        },
       })
 
       if (authError) {
@@ -77,6 +107,7 @@ export default function SignupPage() {
                     placeholder="Your full name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
+                    required
                     className="pl-10 bg-muted/50 border-border/50 focus:border-accent/60 h-11"
                   />
                 </div>
@@ -92,6 +123,7 @@ export default function SignupPage() {
                     placeholder="your-username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    required
                     className="pl-10 bg-muted/50 border-border/50 focus:border-accent/60 h-11"
                   />
                 </div>
