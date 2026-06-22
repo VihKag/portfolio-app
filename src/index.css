@@ -229,6 +229,10 @@
   .animate-blob { animation: blob 9s ease-in-out infinite; }
   .animate-ping-slow { animation: ping-slow 3s ease-out infinite; }
 
+  /* Hide scrollbar but keep scrolling (used by the in-page section nav) */
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   .animation-delay-100  { animation-delay: 100ms; }
   .animation-delay-200  { animation-delay: 200ms; }
   .animation-delay-300  { animation-delay: 300ms; }

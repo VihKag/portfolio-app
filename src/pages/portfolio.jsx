@@ -8,13 +8,31 @@ import { PortfolioGrid } from "@/components/portfolio/portfolio-grid"
 import { ResumeSection } from "@/components/portfolio/resume-section"
 import { ContactForm } from "@/components/portfolio/contact-form"
 import { Header } from "@/components/layout/header"
-import { Mail, Loader2, Twitter, Linkedin, Github, Instagram, Globe, Heart } from "lucide-react"
+import {
+  Mail, Loader2, Twitter, Linkedin, Github, Instagram, Globe, Heart,
+  ArrowDown, ArrowUpRight, Sparkles,
+} from "lucide-react"
 
 const PLATFORM_CONFIG = {
   twitter:   { icon: Twitter,   label: "Twitter",   color: "hover:border-sky-400/60 hover:text-sky-400" },
   linkedin:  { icon: Linkedin,  label: "LinkedIn",  color: "hover:border-blue-500/60 hover:text-blue-400" },
   github:    { icon: Github,    label: "GitHub",    color: "hover:border-purple-400/60 hover:text-purple-400" },
   instagram: { icon: Instagram, label: "Instagram", color: "hover:border-pink-400/60 hover:text-pink-400" },
+}
+
+function SectionHeading({ index, title, subtitle, themeColor }) {
+  return (
+    <div className="mb-10">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-sm font-mono font-semibold tracking-wider" style={{ color: themeColor }}>
+          {index}
+        </span>
+        <span className="h-px w-14" style={{ backgroundColor: `${themeColor}55` }} />
+      </div>
+      <h2 className="text-3xl sm:text-4xl font-bold">{title}</h2>
+      {subtitle && <p className="text-muted-foreground mt-2">{subtitle}</p>}
+    </div>
+  )
 }
 
 export default function PortfolioPage() {
@@ -108,109 +126,247 @@ export default function PortfolioPage() {
   const memories = memoriesHobbies.filter((i) => i.category === "memory")
   const hobbies  = memoriesHobbies.filter((i) => i.category === "hobby")
 
+  const displayName = profile.full_name || username
+  const firstName = (displayName || "").trim().split(/\s+/)[0]
+  const initial = (displayName || username || "?")[0].toUpperCase()
+
+  const hasResume =
+    experiences.length > 0 || education.length > 0 || skills.length > 0 || certifications.length > 0
+  const hasAbout = memories.length > 0 || hobbies.length > 0
+  const skillCount = skills.reduce((n, g) => n + ((g.items || []).length), 0)
+
+  const gradientText = {
+    background: `linear-gradient(120deg, ${themeColor}, ${themeColor}99 70%, hsl(265 55% 72%))`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+  }
+
+  const stats = [
+    items.length > 0       && { value: items.length,        label: items.length === 1 ? "Project" : "Projects" },
+    experiences.length > 0 && { value: experiences.length,  label: experiences.length === 1 ? "Role" : "Roles" },
+    skillCount > 0         && { value: skillCount,           label: "Skills" },
+    certifications.length > 0 && { value: certifications.length, label: "Certs" },
+  ].filter(Boolean)
+
+  const sections = [
+    items.length > 0 && { id: "work", label: "Work" },
+    hasResume && { id: "resume", label: "Resume" },
+    hasAbout && { id: "about", label: "About" },
+    { id: "contact", label: "Contact" },
+  ].filter(Boolean)
+
+  // Two-digit ordinal for a section, based on its position in `sections`
+  const sectionNo = (id) =>
+    String(sections.findIndex((s) => s.id === id) + 1).padStart(2, "0")
+
   return (
     <div
-      className="min-h-screen transition-colors duration-300"
+      className="min-h-screen"
       style={{ "--portfolio-accent": themeColor, "--portfolio-background": backgroundColor, backgroundColor }}
     >
       <Header />
 
-      {/* Cover Image */}
-      <div className={`relative overflow-hidden ${profile.cover_image_url ? "h-52 sm:h-72 md:h-80" : "h-36 sm:h-48"}`}>
-        {profile.cover_image_url ? (
-          <img src={profile.cover_image_url} alt="Cover" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-linear-to-br from-accent/12 via-background to-secondary/10" />
-        )}
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/20 to-background/70" />
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute -top-10 left-1/4 w-64 h-64 bg-accent/8 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 right-1/4 w-48 h-48 bg-secondary/8 rounded-full blur-3xl" />
+      {/* ── HERO ───────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          {profile.cover_image_url && (
+            <>
+              <img src={profile.cover_image_url} alt="" className="w-full h-full object-cover opacity-25" />
+              <div className="absolute inset-0 bg-linear-to-b from-background/80 via-background/90 to-background" />
+            </>
+          )}
+          <div
+            className="absolute -top-24 left-[8%] w-80 h-80 rounded-full blur-3xl animate-pulse-glow"
+            style={{ backgroundColor: `${themeColor}26` }}
+          />
+          <div
+            className="absolute -bottom-16 right-[10%] w-96 h-96 rounded-full blur-3xl animate-float"
+            style={{ backgroundColor: "hsl(265 55% 62% / 0.12)" }}
+          />
         </div>
-      </div>
 
-      <div className="container mx-auto px-4">
-        {/* Profile Section */}
-        <div className="relative -mt-16 sm:-mt-20 mb-14">
-          <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="shrink-0">
+        <div className="container mx-auto px-4 pt-16 pb-20 sm:pt-24 sm:pb-28">
+          <div className="max-w-3xl animate-slide-up">
+            {/* Avatar */}
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 mb-8">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
-                  alt={profile.full_name}
-                  className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl object-cover border-4 border-background shadow-2xl shadow-black/40 ring-2 ring-accent/20"
+                  alt={displayName}
+                  className="w-full h-full rounded-2xl object-cover ring-1 ring-white/10 shadow-2xl shadow-black/50"
+                  style={{ boxShadow: `0 0 0 1px ${themeColor}40, 0 20px 50px -10px ${themeColor}40` }}
                 />
               ) : (
-                <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl bg-linear-to-br from-accent/20 to-secondary/20 border-4 border-background shadow-2xl flex items-center justify-center ring-2 ring-accent/20">
-                  <span className="text-4xl font-bold text-gradient">
-                    {(profile.full_name || username || "?")[0].toUpperCase()}
-                  </span>
+                <div
+                  className="w-full h-full rounded-2xl flex items-center justify-center shadow-2xl"
+                  style={{ background: `linear-gradient(135deg, ${themeColor}33, hsl(265 55% 62% / 0.25))`, boxShadow: `0 0 0 1px ${themeColor}40` }}
+                >
+                  <span className="text-4xl font-bold" style={gradientText}>{initial}</span>
                 </div>
+              )}
+              <span className="absolute -bottom-1.5 -right-1.5 flex h-5 w-5">
+                <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-emerald-400/60" />
+                <span className="relative inline-flex h-5 w-5 rounded-full bg-emerald-400 border-2 border-background" />
+              </span>
+            </div>
+
+            {/* Status pill */}
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mb-6"
+              style={{ borderColor: `${themeColor}40`, backgroundColor: `${themeColor}12`, color: themeColor }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Available for new opportunities
+            </div>
+
+            {/* Greeting + Name */}
+            <p className="text-muted-foreground text-lg mb-2">Hi, I'm</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] mb-6">
+              <span style={gradientText}>{displayName}</span>
+            </h1>
+
+            {profile.bio && (
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8">
+                {profile.bio}
+              </p>
+            )}
+
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-3 mb-10">
+              <a
+                href="#contact"
+                className="inline-flex items-center gap-2 px-6 h-12 rounded-xl font-semibold text-sm transition-transform hover:-translate-y-0.5"
+                style={{ backgroundColor: themeColor, color: "#06121a", boxShadow: `0 10px 30px -8px ${themeColor}80` }}
+              >
+                <Mail className="w-4 h-4" />
+                Get in touch
+              </a>
+              {items.length > 0 && (
+                <a
+                  href="#work"
+                  className="inline-flex items-center gap-2 px-6 h-12 rounded-xl font-semibold text-sm border border-border/60 bg-card/50 hover:bg-card transition-colors"
+                >
+                  View my work
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
               )}
             </div>
 
-            <div className="flex-1 pt-1 sm:pt-12">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gradient">
-                {profile.full_name || username}
-              </h1>
-              {profile.bio && (
-                <p className="text-muted-foreground leading-relaxed mb-5 max-w-2xl">{profile.bio}</p>
-              )}
-              {socialLinks.length > 0 && (
-                <div className="flex gap-2.5 flex-wrap">
-                  {socialLinks.map((link) => {
-                    const cfg = PLATFORM_CONFIG[link.platform] || {}
-                    const Icon = cfg.icon || Globe
-                    return (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border/50 bg-card text-muted-foreground text-sm font-medium transition-all duration-200 hover:bg-card/80 hover:-translate-y-0.5 ${cfg.color || "hover:border-accent/50 hover:text-accent"}`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {cfg.label || link.platform}
-                      </a>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Portfolio Grid */}
-        {items.length > 0 && (
-          <div className="mb-24">
-            <div className="flex items-end justify-between mb-10 pb-5 border-b border-border/30">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-1">My Work</h2>
-                <p className="text-muted-foreground text-sm">
-                  {items.length} item{items.length !== 1 ? "s" : ""} across images, projects, blogs & videos
-                </p>
+            {/* Social links */}
+            {socialLinks.length > 0 && (
+              <div className="flex gap-2.5 flex-wrap mb-12">
+                {socialLinks.map((link) => {
+                  const cfg = PLATFORM_CONFIG[link.platform] || {}
+                  const Icon = cfg.icon || Globe
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={cfg.label || link.platform}
+                      className={`inline-flex items-center justify-center w-11 h-11 rounded-xl border border-border/50 bg-card text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 ${cfg.color || "hover:border-accent/50 hover:text-accent"}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  )
+                })}
               </div>
-            </div>
-            <PortfolioGrid items={items} themeColor={themeColor} backgroundColor={backgroundColor} />
+            )}
+
+            {/* Stats */}
+            {stats.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 border-t border-border/30">
+                {stats.map((s) => (
+                  <div key={s.label}>
+                    <div className="text-2xl sm:text-3xl font-bold" style={{ color: themeColor }}>
+                      {s.value}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground mt-0.5">
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {sections.length > 1 && (
+            <a
+              href={`#${sections[0].id}`}
+              className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mt-16 w-fit"
+            >
+              <ArrowDown className="w-4 h-4 animate-float" />
+              Scroll to explore
+            </a>
+          )}
+        </div>
+      </section>
+
+      {/* ── Sticky section nav ─────────────────── */}
+      {sections.length > 1 && (
+        <nav className="sticky top-14 z-40 border-y border-border/30 glass-dark">
+          <div className="container mx-auto px-4">
+            <ul className="flex gap-1 overflow-x-auto py-2 no-scrollbar">
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className="inline-block px-4 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors whitespace-nowrap"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      )}
+
+      <div className="container mx-auto px-4">
+        {/* ── Work ─────────────────────────────── */}
+        {items.length > 0 && (
+          <section id="work" className="scroll-mt-28 pt-20 mb-8">
+            <SectionHeading
+              index={sectionNo("work")}
+              title={firstName ? `${firstName}'s Work` : "Selected Work"}
+              subtitle={`${items.length} piece${items.length !== 1 ? "s" : ""} — images, projects, blogs & videos`}
+              themeColor={themeColor}
+            />
+            <PortfolioGrid items={items} themeColor={themeColor} backgroundColor={backgroundColor} />
+          </section>
         )}
 
-        {/* Resume */}
-        <ResumeSection
-          experiences={experiences}
-          education={education}
-          skills={skills}
-          certifications={certifications}
-          themeColor={themeColor}
-        />
+        {/* ── Resume ───────────────────────────── */}
+        {hasResume && (
+          <section id="resume" className="scroll-mt-28 pt-20">
+            <SectionHeading
+              index={sectionNo("resume")}
+              title="Career & Skills"
+              subtitle="Experience, education, skills, and certifications"
+              themeColor={themeColor}
+            />
+            <ResumeSection
+              experiences={experiences}
+              education={education}
+              skills={skills}
+              certifications={certifications}
+              themeColor={themeColor}
+              hideHeading
+            />
+          </section>
+        )}
 
-        {/* Memories & Hobbies */}
-        {(memories.length > 0 || hobbies.length > 0) && (
-          <div className="mb-24">
-            <div className="mb-10 pb-5 border-b border-border/30">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-1">About Me</h2>
-              <p className="text-muted-foreground text-sm">My memories and hobbies</p>
-            </div>
+        {/* ── About (memories & hobbies) ───────── */}
+        {hasAbout && (
+          <section id="about" className="scroll-mt-28 pt-20 mb-8">
+            <SectionHeading
+              index={sectionNo("about")}
+              title={firstName ? `Beyond the résumé` : "About Me"}
+              subtitle="A few memories and the things I love doing"
+              themeColor={themeColor}
+            />
             <div className="grid lg:grid-cols-2 gap-12">
               {memories.length > 0 && (
                 <div>
@@ -257,15 +413,17 @@ export default function PortfolioPage() {
                 </div>
               )}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Contact */}
-        <div className="pb-24">
-          <div className="mb-10 pb-5 border-b border-border/30">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-1">Get in Touch</h2>
-            <p className="text-muted-foreground text-sm">Have a question or a project idea? Let's talk.</p>
-          </div>
+        {/* ── Contact ──────────────────────────── */}
+        <section id="contact" className="scroll-mt-28 pt-20 pb-24">
+          <SectionHeading
+            index={sectionNo("contact")}
+            title={firstName ? `Let's build something` : "Get in Touch"}
+            subtitle="Have a question or a project idea? Drop me a message."
+            themeColor={themeColor}
+          />
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <ContactForm userId={profile.id} />
@@ -274,8 +432,8 @@ export default function PortfolioPage() {
               <div className="p-6 rounded-2xl border border-border/50 bg-card">
                 <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Contact Info</h3>
                 <div className="flex items-center gap-2.5 text-sm">
-                  <Mail className="w-4 h-4 text-accent shrink-0" />
-                  <a href={`mailto:${profile.email}`} className="text-foreground hover:text-accent transition-colors break-all">
+                  <Mail className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
+                  <a href={`mailto:${profile.email}`} className="text-foreground hover:underline break-all">
                     {profile.email}
                   </a>
                 </div>
@@ -305,8 +463,16 @@ export default function PortfolioPage() {
               )}
             </div>
           </div>
-        </div>
+        </section>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border/30 py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          © {new Date().getFullYear()} {displayName} · Built with{" "}
+          <Heart className="inline w-3.5 h-3.5 -mt-0.5" style={{ color: themeColor }} /> on Folio
+        </div>
+      </footer>
     </div>
   )
 }

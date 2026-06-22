@@ -14,17 +14,19 @@ function dateRange(start, end) {
   return [start, end].filter(Boolean).join(" – ")
 }
 
-export function ResumeSection({ experiences = [], education = [], skills = [], certifications = [], themeColor }) {
+export function ResumeSection({ experiences = [], education = [], skills = [], certifications = [], themeColor, hideHeading = false }) {
   const hasAnything =
     experiences.length > 0 || education.length > 0 || skills.length > 0 || certifications.length > 0
   if (!hasAnything) return null
 
   return (
-    <div className="mb-20">
-      <div className="mb-12">
-        <h2 className="text-3xl font-bold mb-2">Resume</h2>
-        <p className="text-muted-foreground">My experience, education, skills, and certifications</p>
-      </div>
+    <div className={hideHeading ? "" : "mb-20"}>
+      {!hideHeading && (
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-2">Resume</h2>
+          <p className="text-muted-foreground">My experience, education, skills, and certifications</p>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-12">
         {/* Main column: experience + education */}
