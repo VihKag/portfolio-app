@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { PortfolioGrid } from "@/components/portfolio/portfolio-grid"
 import { ResumeSection } from "@/components/portfolio/resume-section"
 import { ContactForm } from "@/components/portfolio/contact-form"
+import { SecretVault } from "@/components/portfolio/secret-vault"
 import { Header } from "@/components/layout/header"
 import {
   Mail, Loader2, Twitter, Linkedin, Github, Instagram, Globe, Heart,
@@ -41,6 +42,8 @@ export default function PortfolioPage() {
   const [items, setItems] = useState([])
   const [socialLinks, setSocialLinks] = useState([])
   const [memoriesHobbies, setMemoriesHobbies] = useState([])
+  const [vaultItems, setVaultItems] = useState([])
+  const [vaultOpen, setVaultOpen] = useState(false)
   const [experiences, setExperiences] = useState([])
   const [education, setEducation] = useState([])
   const [skills, setSkills] = useState([])
@@ -74,11 +77,13 @@ export default function PortfolioPage() {
           { data: itemsData },
           { data: linksData },
           { data: memoriesData },
+          { data: vaultData },
           expRes, eduRes, skillsRes, certRes,
         ] = await Promise.all([
           supabase.from("portfolio_items").select("*").eq("user_id", profileData.id).order("created_at", { ascending: false }),
           supabase.from("social_links").select("*").eq("user_id", profileData.id),
           supabase.from("memories_hobbies").select("*").eq("user_id", profileData.id).order("created_at", { ascending: false }),
+          supabase.from("personal_vault").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("experiences").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("education").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("skills").select("*").eq("user_id", profileData.id).order("sort_order"),
@@ -88,6 +93,7 @@ export default function PortfolioPage() {
         if (itemsData) setItems(itemsData)
         if (linksData) setSocialLinks(linksData)
         if (memoriesData) setMemoriesHobbies(memoriesData)
+        if (vaultData) setVaultItems(vaultData)
         if (expRes.data) setExperiences(expRes.data)
         if (eduRes.data) setEducation(eduRes.data)
         if (skillsRes.data) setSkills(skillsRes.data)
@@ -466,13 +472,34 @@ export default function PortfolioPage() {
         </section>
       </div>
 
-      {/* Footer */}
+      {/* Footer — the heart is a hidden trigger for the secret vault */}
       <footer className="border-t border-border/30 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} {displayName} · Built with{" "}
-          <Heart className="inline w-3.5 h-3.5 -mt-0.5" style={{ color: themeColor }} /> on Folio
+          {vaultItems.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setVaultOpen(true)}
+              aria-label="secret"
+              title=""
+              className="inline-flex align-middle -mt-0.5 cursor-pointer rounded-full transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            >
+              <Heart className="w-3.5 h-3.5" style={{ color: themeColor }} />
+            </button>
+          ) : (
+            <Heart className="inline w-3.5 h-3.5 -mt-0.5" style={{ color: themeColor }} />
+          )}{" "}
+          on Folio
         </div>
       </footer>
+
+      <SecretVault
+        open={vaultOpen}
+        onClose={() => setVaultOpen(false)}
+        items={vaultItems}
+        displayName={firstName || displayName}
+        themeColor={themeColor}
+      />
     </div>
   )
 }

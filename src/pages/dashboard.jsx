@@ -10,6 +10,7 @@ import { ResumeManager } from "@/components/dashboard/resume-manager"
 import { SocialLinksManager } from "@/components/dashboard/social-links-manager"
 import { ContactMessages } from "@/components/dashboard/contact-messages"
 import { MemoriesHobbies } from "@/components/dashboard/memories-hobbies"
+import { PersonalVault } from "@/components/dashboard/personal-vault"
 import { ThemeCustomizer } from "@/components/dashboard/theme-customizer"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { toast } from "sonner"
@@ -84,11 +85,12 @@ export default function DashboardPage({ session }) {
 
       <div className="container mx-auto py-8 px-4 max-w-5xl">
         <Tabs defaultValue="portfolio" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="resume">Resume</TabsTrigger>
             <TabsTrigger value="memories">Memories</TabsTrigger>
+            <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="social">Social Links</TabsTrigger>
             <TabsTrigger value="theme">Theme</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
@@ -108,6 +110,10 @@ export default function DashboardPage({ session }) {
 
           <TabsContent value="memories" className="mt-6">
             <MemoriesHobbies userId={user.id} />
+          </TabsContent>
+
+          <TabsContent value="personal" className="mt-6">
+            <PersonalVault userId={user.id} />
           </TabsContent>
 
           <TabsContent value="social" className="mt-6">
