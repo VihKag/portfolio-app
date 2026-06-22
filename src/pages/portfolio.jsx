@@ -476,19 +476,15 @@ export default function PortfolioPage() {
       <footer className="border-t border-border/30 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} {displayName} · Built with{" "}
-          {vaultItems.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setVaultOpen(true)}
-              aria-label="secret"
-              title=""
-              className="inline-flex align-middle -mt-0.5 cursor-pointer rounded-full transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-            >
-              <Heart className="w-3.5 h-3.5" style={{ color: themeColor }} />
-            </button>
-          ) : (
-            <Heart className="inline w-3.5 h-3.5 -mt-0.5" style={{ color: themeColor }} />
-          )}{" "}
+          <button
+            type="button"
+            onClick={() => setVaultOpen(true)}
+            aria-label="secret"
+            title=""
+            className="inline-flex align-middle -mt-0.5 cursor-pointer rounded-full transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
+            <Heart className="w-3.5 h-3.5" style={{ color: themeColor }} />
+          </button>{" "}
           on Folio
         </div>
       </footer>
