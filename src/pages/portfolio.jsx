@@ -8,8 +8,14 @@ import { PortfolioGrid } from "@/components/portfolio/portfolio-grid"
 import { ResumeSection } from "@/components/portfolio/resume-section"
 import { ContactForm } from "@/components/portfolio/contact-form"
 import { Header } from "@/components/layout/header"
-import { Mail, Loader, Heart } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Mail, Loader2, Twitter, Linkedin, Github, Instagram, Globe, Heart } from "lucide-react"
+
+const PLATFORM_CONFIG = {
+  twitter:   { icon: Twitter,   label: "Twitter",   color: "hover:border-sky-400/60 hover:text-sky-400" },
+  linkedin:  { icon: Linkedin,  label: "LinkedIn",  color: "hover:border-blue-500/60 hover:text-blue-400" },
+  github:    { icon: Github,    label: "GitHub",    color: "hover:border-purple-400/60 hover:text-purple-400" },
+  instagram: { icon: Instagram, label: "Instagram", color: "hover:border-pink-400/60 hover:text-pink-400" },
+}
 
 export default function PortfolioPage() {
   const { username } = useParams()
@@ -28,16 +34,13 @@ export default function PortfolioPage() {
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        const { data: profileData, error: profileError } = await supabase
+        const { data: profileData, error } = await supabase
           .from("users")
           .select("*")
           .eq("username", username)
           .single()
 
-        if (profileError || !profileData) {
-          setLoading(false)
-          return
-        }
+        if (error || !profileData) { setLoading(false); return }
 
         setProfile(profileData)
         if (profileData.theme_color) {
@@ -49,39 +52,30 @@ export default function PortfolioPage() {
           document.documentElement.style.setProperty("--portfolio-background", profileData.background_color)
         }
 
-        const { data: itemsData } = await supabase
-          .from("portfolio_items")
-          .select("*")
-          .eq("user_id", profileData.id)
-          .order("created_at", { ascending: false })
-
-        if (itemsData) setItems(itemsData)
-
-        const { data: linksData } = await supabase.from("social_links").select("*").eq("user_id", profileData.id)
-
-        if (linksData) setSocialLinks(linksData)
-
-        const { data: memoriesData } = await supabase
-          .from("memories_hobbies")
-          .select("*")
-          .eq("user_id", profileData.id)
-          .order("created_at", { ascending: false })
-
-        if (memoriesData) setMemoriesHobbies(memoriesData)
-
-        const [expRes, eduRes, skillsRes, certRes] = await Promise.all([
+        const [
+          { data: itemsData },
+          { data: linksData },
+          { data: memoriesData },
+          expRes, eduRes, skillsRes, certRes,
+        ] = await Promise.all([
+          supabase.from("portfolio_items").select("*").eq("user_id", profileData.id).order("created_at", { ascending: false }),
+          supabase.from("social_links").select("*").eq("user_id", profileData.id),
+          supabase.from("memories_hobbies").select("*").eq("user_id", profileData.id).order("created_at", { ascending: false }),
           supabase.from("experiences").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("education").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("skills").select("*").eq("user_id", profileData.id).order("sort_order"),
           supabase.from("certifications").select("*").eq("user_id", profileData.id).order("sort_order"),
         ])
 
+        if (itemsData) setItems(itemsData)
+        if (linksData) setSocialLinks(linksData)
+        if (memoriesData) setMemoriesHobbies(memoriesData)
         if (expRes.data) setExperiences(expRes.data)
         if (eduRes.data) setEducation(eduRes.data)
         if (skillsRes.data) setSkills(skillsRes.data)
         if (certRes.data) setCertifications(certRes.data)
-      } catch (error) {
-        console.error("Error fetching portfolio:", error)
+      } catch (err) {
+        console.error("Error fetching portfolio:", err)
       } finally {
         setLoading(false)
       }
@@ -92,96 +86,116 @@ export default function PortfolioPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen gap-2">
-        <Loader className="w-6 h-6 animate-spin text-accent" />
-        <span>Loading portfolio...</span>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3 text-muted-foreground">
+        <Loader2 className="w-7 h-7 animate-spin text-accent" />
+        <span className="text-sm">Loading portfolio…</span>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh] text-xl text-muted-foreground">
-          Portfolio not found
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="text-6xl">🔍</div>
+        <h1 className="text-2xl font-bold">Portfolio not found</h1>
+        <p className="text-muted-foreground">
+          The portfolio <span className="text-foreground font-medium">@{username}</span> doesn't exist.
+        </p>
       </div>
     )
   }
 
   const memories = memoriesHobbies.filter((i) => i.category === "memory")
-  const hobbies = memoriesHobbies.filter((i) => i.category === "hobby")
+  const hobbies  = memoriesHobbies.filter((i) => i.category === "hobby")
 
   return (
     <div
       className="min-h-screen transition-colors duration-300"
-      style={{
-        "--portfolio-accent": themeColor,
-        "--portfolio-background": backgroundColor,
-        backgroundColor: backgroundColor,
-      }}
+      style={{ "--portfolio-accent": themeColor, "--portfolio-background": backgroundColor, backgroundColor }}
     >
       <Header />
 
-      {profile.cover_image_url && (
-        <div className="h-48 sm:h-64 md:h-80 overflow-hidden relative bg-muted">
-          <img src={profile.cover_image_url || "/placeholder.svg"} alt="Cover" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60"></div>
+      {/* Cover Image */}
+      <div className={`relative overflow-hidden ${profile.cover_image_url ? "h-52 sm:h-72 md:h-80" : "h-36 sm:h-48"}`}>
+        {profile.cover_image_url ? (
+          <img src={profile.cover_image_url} alt="Cover" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-linear-to-br from-accent/12 via-background to-secondary/10" />
+        )}
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/20 to-background/70" />
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 left-1/4 w-64 h-64 bg-accent/8 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 right-1/4 w-48 h-48 bg-secondary/8 rounded-full blur-3xl" />
         </div>
-      )}
+      </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col sm:flex-row gap-8 items-start mb-16">
-          {profile.avatar_url && (
-            <img
-              src={profile.avatar_url || "/placeholder.svg"}
-              alt={profile.full_name}
-              className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover border-4 -mt-20 sm:-mt-24 transition-transform duration-300 hover:scale-105"
-              style={{ borderColor: themeColor }}
-            />
-          )}
-          <div className="flex-1 pt-4">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-3 text-gradient">{profile.full_name}</h1>
-            {profile.bio && (
-              <p className="text-lg text-muted-foreground mb-6 max-w-2xl leading-relaxed">{profile.bio}</p>
-            )}
+      <div className="container mx-auto px-4">
+        {/* Profile Section */}
+        <div className="relative -mt-16 sm:-mt-20 mb-14">
+          <div className="flex flex-col sm:flex-row gap-5 items-start">
+            <div className="shrink-0">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.full_name}
+                  className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl object-cover border-4 border-background shadow-2xl shadow-black/40 ring-2 ring-accent/20"
+                />
+              ) : (
+                <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl bg-linear-to-br from-accent/20 to-secondary/20 border-4 border-background shadow-2xl flex items-center justify-center ring-2 ring-accent/20">
+                  <span className="text-4xl font-bold text-gradient">
+                    {(profile.full_name || username || "?")[0].toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
 
-            {socialLinks.length > 0 && (
-              <div className="flex gap-3 flex-wrap">
-                {socialLinks.map((link) => (
-                  <Button
-                    key={link.id}
-                    asChild
-                    variant="outline"
-                    className="capitalize transition-all duration-300 hover:shadow-lg bg-transparent"
-                    style={{
-                      borderColor: themeColor,
-                      "--tw-shadow-color": `${themeColor}20`,
-                    }}
-                  >
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
-                      {link.platform}
-                    </a>
-                  </Button>
-                ))}
-              </div>
-            )}
+            <div className="flex-1 pt-1 sm:pt-12">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gradient">
+                {profile.full_name || username}
+              </h1>
+              {profile.bio && (
+                <p className="text-muted-foreground leading-relaxed mb-5 max-w-2xl">{profile.bio}</p>
+              )}
+              {socialLinks.length > 0 && (
+                <div className="flex gap-2.5 flex-wrap">
+                  {socialLinks.map((link) => {
+                    const cfg = PLATFORM_CONFIG[link.platform] || {}
+                    const Icon = cfg.icon || Globe
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border/50 bg-card text-muted-foreground text-sm font-medium transition-all duration-200 hover:bg-card/80 hover:-translate-y-0.5 ${cfg.color || "hover:border-accent/50 hover:text-accent"}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {cfg.label || link.platform}
+                      </a>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Portfolio Grid */}
         {items.length > 0 && (
-          <div className="mb-20">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-2">My Work</h2>
-              <p className="text-muted-foreground">
-                Browse my portfolio by type: images, projects, blog posts, and videos
-              </p>
+          <div className="mb-24">
+            <div className="flex items-end justify-between mb-10 pb-5 border-b border-border/30">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-1">My Work</h2>
+                <p className="text-muted-foreground text-sm">
+                  {items.length} item{items.length !== 1 ? "s" : ""} across images, projects, blogs & videos
+                </p>
+              </div>
             </div>
             <PortfolioGrid items={items} themeColor={themeColor} backgroundColor={backgroundColor} />
           </div>
         )}
 
+        {/* Resume */}
         <ResumeSection
           experiences={experiences}
           education={education}
@@ -190,42 +204,32 @@ export default function PortfolioPage() {
           themeColor={themeColor}
         />
 
+        {/* Memories & Hobbies */}
         {(memories.length > 0 || hobbies.length > 0) && (
-          <div className="mb-20">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-2">About Me</h2>
-              <p className="text-muted-foreground">Explore my memories and hobbies</p>
+          <div className="mb-24">
+            <div className="mb-10 pb-5 border-b border-border/30">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-1">About Me</h2>
+              <p className="text-muted-foreground text-sm">My memories and hobbies</p>
             </div>
-
             <div className="grid lg:grid-cols-2 gap-12">
               {memories.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                    <Heart className="w-6 h-6" style={{ color: themeColor }} />
-                    My Memories
+                  <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <Heart className="w-5 h-5" style={{ color: themeColor }} />
+                    Memories
                   </h3>
                   <div className="space-y-4">
                     {memories.map((item) => (
-                      <Card
-                        key={item.id}
-                        className="border-border overflow-hidden hover:transition-all duration-300 hover:shadow-lg"
-                        style={{
-                          "--tw-shadow-color": `${themeColor}20`,
-                        }}
-                      >
+                      <Card key={item.id} className="border-border/50 overflow-hidden hover:shadow-lg transition-shadow">
                         {item.image_url && (
-                          <img
-                            src={item.image_url || "/placeholder.svg"}
-                            alt={item.title}
-                            className="w-full h-48 object-cover"
-                          />
+                          <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
                         )}
                         <div className="p-6">
                           <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
                           <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
                           {item.date && (
                             <p className="text-xs text-muted-foreground mt-3">
-                              📅 {new Date(item.date).toLocaleDateString()}
+                              {new Date(item.date).toLocaleDateString()}
                             </p>
                           )}
                         </div>
@@ -234,25 +238,14 @@ export default function PortfolioPage() {
                   </div>
                 </div>
               )}
-
               {hobbies.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-semibold mb-6">My Hobbies</h3>
+                  <h3 className="text-xl font-semibold mb-6">Hobbies</h3>
                   <div className="space-y-4">
                     {hobbies.map((item) => (
-                      <Card
-                        key={item.id}
-                        className="border-border overflow-hidden hover:transition-all duration-300 hover:shadow-lg"
-                        style={{
-                          "--tw-shadow-color": `${themeColor}20`,
-                        }}
-                      >
+                      <Card key={item.id} className="border-border/50 overflow-hidden hover:shadow-lg transition-shadow">
                         {item.image_url && (
-                          <img
-                            src={item.image_url || "/placeholder.svg"}
-                            alt={item.title}
-                            className="w-full h-48 object-cover"
-                          />
+                          <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
                         )}
                         <div className="p-6">
                           <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
@@ -267,20 +260,50 @@ export default function PortfolioPage() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <h2 className="text-3xl font-bold mb-2">Get in Touch</h2>
-            <p className="text-muted-foreground mb-8">Have a question? Let's connect!</p>
-            <ContactForm userId={profile.id} themeColor={themeColor} />
+        {/* Contact */}
+        <div className="pb-24">
+          <div className="mb-10 pb-5 border-b border-border/30">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1">Get in Touch</h2>
+            <p className="text-muted-foreground text-sm">Have a question or a project idea? Let's talk.</p>
           </div>
-          <div>
-            <Card className="p-8 border-border bg-card/50 sticky top-24">
-              <h3 className="font-semibold mb-6 flex items-center gap-3 text-lg">
-                <Mail className="w-5 h-5" style={{ color: themeColor }} />
-                Contact Info
-              </h3>
-              <p className="text-muted-foreground break-all hover:text-foreground transition-colors">{profile.email}</p>
-            </Card>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <ContactForm userId={profile.id} />
+            </div>
+            <div className="space-y-4">
+              <div className="p-6 rounded-2xl border border-border/50 bg-card">
+                <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Contact Info</h3>
+                <div className="flex items-center gap-2.5 text-sm">
+                  <Mail className="w-4 h-4 text-accent shrink-0" />
+                  <a href={`mailto:${profile.email}`} className="text-foreground hover:text-accent transition-colors break-all">
+                    {profile.email}
+                  </a>
+                </div>
+              </div>
+              {socialLinks.length > 0 && (
+                <div className="p-6 rounded-2xl border border-border/50 bg-card">
+                  <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Find Me Online</h3>
+                  <div className="space-y-3">
+                    {socialLinks.map((link) => {
+                      const cfg = PLATFORM_CONFIG[link.platform] || {}
+                      const Icon = cfg.icon || Globe
+                      return (
+                        <a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-accent transition-colors"
+                        >
+                          <Icon className="w-4 h-4" />
+                          {cfg.label || link.platform}
+                        </a>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

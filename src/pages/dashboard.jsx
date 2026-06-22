@@ -31,10 +31,7 @@ export default function DashboardPage({ session }) {
           return
         }
 
-        const {
-          data: { user: authUser },
-          error,
-        } = await supabase.auth.getUser()
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
         if (error || !authUser) {
           toast.error("Please log in to access the dashboard")
@@ -46,7 +43,7 @@ export default function DashboardPage({ session }) {
         const { data: profile } = await supabase.from("users").select("*").eq("id", authUser.id).single()
         setUserProfile(profile)
       } catch (err) {
-        console.error("[v0] Error checking user:", err)
+        console.error("Error checking user:", err)
         toast.error("Authentication error")
         navigate("/auth/login", { replace: true })
       } finally {
@@ -85,7 +82,7 @@ export default function DashboardPage({ session }) {
     <div className="min-h-screen bg-background">
       <DashboardHeader user={user} onLogout={handleLogout} username={userProfile?.username} />
 
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4 max-w-5xl">
         <Tabs defaultValue="portfolio" className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 h-auto">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
@@ -101,7 +98,7 @@ export default function DashboardPage({ session }) {
             <PortfolioManager userId={user.id} themeColor={userProfile?.theme_color} />
           </TabsContent>
 
-          <TabsContent value="profile" className="mt-6">
+          <TabsContent value="profile" className="mt-0 animate-fade-in">
             <ProfileSettings userId={user.id} />
           </TabsContent>
 
